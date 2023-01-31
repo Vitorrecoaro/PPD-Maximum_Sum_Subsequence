@@ -7,19 +7,26 @@ int MaxIncreasingSub(int *arr, int n, int k)
 { 
 	int **dp, ans = -1;
 	dp = malloc(n * sizeof(int*));
-	for(int i=0; i < n; i++)
+	int i, j;
+
+    #pragma omp parallel for
+	for(i = 0; i < n; i++)
 		dp[i] = malloc((k+1) * sizeof(int));
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < k; j++){
+
+    #pragma omp parallel for private(j)
+	for(i = 0; i < n; i++){
+		for(j = 0; j < k; j++){
 			dp[i][j] = -1;
 		}
 	}
-	for (int i = 0; i < n; i++) { 
-		dp[i][1] = arr[i]; 
-	} 
 
-	for (int i = 1; i < n; i++) { 
-		for (int j = 0; j < i; j++) { 
+    #pragma omp parallel for
+	for (i = 0; i < n; i++) { 
+		dp[i][1] = arr[i]; 
+	}
+
+	for (i = 1; i < n; i++) { 
+		for (j = 0; j < i; j++) { 
 			if (arr[j] < arr[i]) { 
 				for (int l = 1; l <= k - 1; l++) { 
 					if (dp[j][l] != -1) { 
@@ -30,10 +37,10 @@ int MaxIncreasingSub(int *arr, int n, int k)
 		} 
 	} 
 
-	for (int i = 0; i < n; i++) { 
+	for (i = 0; i < n; i++) { 
 		if (ans < dp[i][k]) 
 			ans = dp[i][k]; 
-	}
+	} 
 
 	return (ans == -1) ? 0 : ans; 
 } 
