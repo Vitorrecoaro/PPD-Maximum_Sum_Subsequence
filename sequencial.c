@@ -26,7 +26,7 @@ int MaxIncreasingSub(int *arr, int n, int k)
 						dp[i][l + 1] = MAX(dp[i][l + 1],dp[j][l] + arr[i]); 
 					} 
 				} 
-			} 
+			}
 		} 
 	} 
 
