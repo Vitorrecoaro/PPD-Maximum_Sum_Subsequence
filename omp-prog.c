@@ -8,47 +8,39 @@ int MaxIncreasingSub(int *arr, int n, int k)
 	int **dp, ans = -1;
 	dp = malloc(n * sizeof(int*));
 
-	#pragma omp parallel
-	{
-		int j;
+	int i, l, j;
 
-		#pragma omp for
-		for(int i = 0; i < n; i++)
-			dp[i] = malloc((k+1) * sizeof(int));
+	#pragma omp parallel for
+	for(i = 0; i < n; i++)
+		dp[i] = malloc((k+1) * sizeof(int));
 
-		#pragma omp for private(j)
-		for(int i = 0; i < n; i++){
-			for(j = 0; j < k; j++){
-				dp[i][j] = -1;
-			}
+	#pragma omp parallel for collapse(2)
+	for(i = 0; i < n; i++){
+		for(j = 0; j < k; j++){
+			dp[i][j] = -1;
 		}
-
-		#pragma omp for
-		for (int i = 0; i < n; i++) { 
-			dp[i][1] = arr[i]; 
-		} 
 	}
 
-	#pragma omp parallel
-	{
-		int j, l;
+	#pragma omp parallel for
+	for (i = 0; i < n; i++) { 
+		dp[i][1] = arr[i]; 
+	}
 
-		#pragma omp for private(j,l)
-		for (int i = 1; i < n; i++) { 
-			for ( j = 0; j < i; j++) {
-				if (arr[j] < arr[i]) {
-					for (l = 1; l <= k - 1; l++) { 
-						if (dp[j][l] != -1) { 
-							dp[i][l + 1] = MAX(dp[i][l + 1],dp[j][l] + arr[i]); 
-						} 
+	for (int i = 1; i < k; i++) { 
+		#pragma omp parallel for collapse(1) private(l)
+		for (int j = i; j < n; j++) { 
+			for (int l = 1; l < j; l++) { 
+				if (arr[l] < arr[j]) { 
+					if (dp[l][i] != -1) { 
+						dp[j][i + 1] = MAX(dp[j][i + 1],dp[l][i] + arr[j]); 
 					} 
-				}
-			} 
+				} 
+			}
 		} 
-	}
+	}  
 
 	# pragma omp parallel for reduction(max : ans)
-	for (int i = 0; i < n; i++) { 
+	for (i = 0; i < n; i++) { 
 		if (ans < dp[i][k]) 
 			ans = dp[i][k]; 
 	}
