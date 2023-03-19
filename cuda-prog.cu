@@ -67,6 +67,7 @@ int MaxIncreasingSub(int *arr, int n, int k)
         calculatePartialSum<<<blocksPerGrid, threadsPerBlock>>>( totalOperations, i, k, d_arr, d_dp);
         cudaDeviceSynchronize();
 	}
+    cudaFree(d_arr);
 
     int ans, *d_ans;
 
@@ -79,7 +80,6 @@ int MaxIncreasingSub(int *arr, int n, int k)
     calculateAnswer<<<blockPerGrid, threadPerBlock>>>(n, k, d_ans, d_dp);
     cudaDeviceSynchronize();
     cudaMemcpy(&ans, d_ans, sizeof(int), cudaMemcpyDeviceToHost);
-    cudaFree(d_arr);
     cudaFree(d_dp);
     cudaFree(d_ans);
 
