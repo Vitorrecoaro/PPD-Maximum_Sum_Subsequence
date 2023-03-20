@@ -116,7 +116,7 @@ void workerFunction()
 	dp = malloc(n * sizeof(int));
 	MPI_Bcast((void *)arr, n, MPI_INT, 0, MPI_COMM_WORLD);
 
-	for (int i = 0; i < k; i++)
+	for (int i = 1; i < k; i++)
 	{
 		int *indexes, qtdTasks, *results;
 

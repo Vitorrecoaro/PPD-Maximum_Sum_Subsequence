@@ -60,7 +60,7 @@ int MaxIncreasingSub(int *arr, int n, int k)
     cudaMemcpy(d_dp, dp, n * (k + 1) * sizeof(int), cudaMemcpyHostToDevice);
     free(dp);
 
-	for(int i = 0; i < k; i ++){
+	for(int i = 1; i < k; i ++){
         int threadsPerBlock = 1024;
         int totalOperations = (n * n + i - (n + i * i)) / 2;
         int blocksPerGrid = (totalOperations + threadsPerBlock - 1) / threadsPerBlock;
