@@ -5,25 +5,25 @@
 // # qtdTotalSum = A quantidade total de somas parciais que serão feitas, que pode ser calculada por uma P.A de ordem 1
 // # iniciando de "col" e indo até "n-1", sendo assim ficando a seguinte equação para o cálculo da soma total:
 // # ((col + n - 1)*(n - col)) / 2 =>  n^2 + col - (n + col^2) / 2 
-__global__ void calculatePartialSum( int totalOperations, int col, int n, int *arr, int *dp){
+__global__ void calculatePartialSum( int totalOperations, int lin, int n, int *arr, int *dp){
 	// # Para achar a qual elemento do vetor a thread se refere, é fazer a conta reversa, pois se o id da thread for 5,
 	// # então já se passaram 5 contas feitas antes dela, assim podemos usar bhaskara para achar a qual elemento da arr 
-	// # a thread se refere com a seguinte conta: "valorVet"=(1 + sqrt(1-4*(col - col^2 - 2*idx))/2, como poderá dar uns
+	// # a thread se refere com a seguinte conta: "valorVet"=(1 + sqrt(1-4*(lin - lin^2 - 2*idx))/2, como poderá dar uns
     // # quebrados, pegamos o chão desta conta.
 
 	// # E para achar com qual elemento da array ela vai tentar fazer a soma a gente usa o resultado anterior e calcula 
 	// # em qual thread id se iniciou aquele bloco de comparação e faz a subtração desse elemento com o thread id. 
-	// # Utilizando a seguinte conta: threadId - (valorVet^2 + col - valorVet - col^2)/ 2.
+	// # Utilizando a seguinte conta: threadId - (valorVet^2 + lin - valorVet - lin^2)/ 2.
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
     if(idx < totalOperations){
-        int refValue = (int)(1 + sqrtf((float)(1 - 4 * ((col + 1) - ((col + 1) * (col + 1)) - 2 * idx)))) / 2;
-        int compValue = (int)(idx) - (int)(refValue * refValue + (col + 1) - refValue - (col + 1) * (col + 1)) / 2;
+        int refValue = (int)(1 + sqrtf((float)(1 - 4 * ((lin + 1) - ((lin + 1) * (lin + 1)) - 2 * idx)))) / 2;
+        int compValue = (int)(idx) - (int)(refValue * refValue + (lin + 1) - refValue - (lin + 1) * (lin + 1)) / 2;
 
         if(arr[compValue] < arr[refValue]){
-            if(dp[col * n + compValue] != -1){
-                int newVal = dp[col * n + compValue] + arr[refValue];
-                atomicMax(&dp[(col + 1) * n + refValue ], newVal);
+            if(dp[lin * n + compValue] != -1){
+                int newVal = dp[lin * n + compValue] + arr[refValue];
+                atomicMax(&dp[(lin + 1) * n + refValue ], newVal);
             }
         }
     }
