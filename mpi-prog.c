@@ -9,6 +9,14 @@ typedef struct infoNode
 	int qtdTasks;
 } infoNode;
 
+void resetArray(int tam, int *arr)
+{
+	for (int i = 0; i < tam; i++)
+	{
+		arr[i] = 0;
+	}
+}
+
 void masterFunction(int totalNodes)
 {
 	int n, k, qtdTaskPerNode, rest, ans, maxTasks;
@@ -77,6 +85,8 @@ void masterFunction(int totalNodes)
 		{
 			int *receivedNumbers = malloc(maxTasks * sizeof(int));
 
+			resetArray(n, dp);
+
 			for (int j = 1; j < totalNodes; j++)
 			{
 				MPI_Recv(receivedNumbers, infosNodes[j - 1].qtdTasks, MPI_INT, j, 0, MPI_COMM_WORLD, NULL);
@@ -112,13 +122,6 @@ void masterFunction(int totalNodes)
 	free(infosNodes);
 }
 
-
-void resetArray(int tam, int *arr){
-	for (int i = 0; i < tam; i++){
-		arr[i] = 0;
-	}
-}
-
 void workerFunction(int rank, int totalNodes)
 {
 	int *arr, n, k, *dp, *results, *indexes, maxTasks;
@@ -134,8 +137,8 @@ void workerFunction(int rank, int totalNodes)
 
 	MPI_Bcast((void *)arr, n, MPI_INT, 0, MPI_COMM_WORLD);
 
-	indexes = (int *) malloc(maxTasks * sizeof(int));
-	results = (int *) calloc(maxTasks, sizeof(int));
+	indexes = (int *)malloc(maxTasks * sizeof(int));
+	results = (int *)calloc(maxTasks, sizeof(int));
 
 	for (int i = 1; i < k; i++)
 	{
@@ -154,8 +157,9 @@ void workerFunction(int rank, int totalNodes)
 					if (dp[l] != 0)
 					{
 						results[j] = MAX(results[j], dp[l] + arr[indexes[j]]);
-						
-						if (i == k - 1){
+
+						if (i == k - 1)
+						{
 							max = MAX(max, results[j]);
 						}
 					}
